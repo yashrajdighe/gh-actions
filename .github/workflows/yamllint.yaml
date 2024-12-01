@@ -10,4 +10,4 @@ jobs:
   yamllint:
     runs-on: ubuntu-latest
     steps:
-      - uses: yashrajdighe/gh-actions/yamllint@Add-yamllint-action
+      - uses: yashrajdighe/gh-actions/yamllint@main
