@@ -1,0 +1,54 @@
+name: 'Yamllint'
+description: 'A linter for YAML files.'
+inputs:
+  python-version:
+    description: 'Python version to be used'
+    required: true
+    default: '3.13.0'
+  setup-python-action-commit-sha:
+    description: 'Setup Python Action commit sha to be used'
+    required: true
+    #v5.3.0
+    default: '55aad42e4674b58b2b2fb7d8e7552402d922b4e7'
+  actions-checkout-commit-sha:
+    description: 'This action checks-out your repository under $GITHUB_WORKSPACE, so your workflow can access it.'
+    required: true
+    # v4.2.2
+    default: 'cbb722410c2e876e24abbe8de2cc27693e501dcb'
+  actions-tj-changed-files-sha:
+    description: 'This action track all changed files and directories relative to a target branch.'
+    required: true
+    # v45.0.4
+    default: '462396174fbac0a68f4d62d4ea0324c3131306d7'
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@${{ inputs.actions-checkout-commit-sha }}
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@${{ inputs.actions-tj-changed-files-sha }}
+      with:
+        # Avoid using single or double quotes for multiline patterns
+        files: |
+          **.yaml
+          **.yml
+    - name: List all changed files
+      if: steps.changed-files.outputs.any_changed == 'true'
+      env:
+        ALL_CHANGED_FILES: |
+          ${{ steps.changed-files.outputs.all_changed_files }}
+      run: |
+        for file in ${ALL_CHANGED_FILES}; do
+          echo "$file was changed"
+        done
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@${{ inputs.setup-python-action-commit-sha }}
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --user yamllint
+    - name: Analysing the code with pylint
+      run: |
+        yamllint ${ALL_CHANGED_FILES}
