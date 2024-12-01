@@ -1,3 +1,4 @@
+---
 name: 'Yamllint'
 description: 'A linter for YAML files.'
 inputs:
@@ -8,15 +9,17 @@ inputs:
   setup-python-action-commit-sha:
     description: 'Setup Python Action commit sha to be used'
     required: true
-    #v5.3.0
+    # v5.3.0
     default: '55aad42e4674b58b2b2fb7d8e7552402d922b4e7'
   actions-checkout-commit-sha:
-    description: 'This action checks-out your repository under $GITHUB_WORKSPACE, so your workflow can access it.'
+    description: |
+      'This action checks-out your repository under $GITHUB_WORKSPACE, so your workflow can access it.'
     required: true
     # v4.2.2
     default: 'cbb722410c2e876e24abbe8de2cc27693e501dcb'
   actions-tj-changed-files-sha:
-    description: 'This action track all changed files and directories relative to a target branch.'
+    description: |
+      'This action track all changed files and directories relative to a target branch.'
     required: true
     # v45.0.4
     default: '462396174fbac0a68f4d62d4ea0324c3131306d7'
