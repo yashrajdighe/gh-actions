@@ -1,13 +1,13 @@
 ---
-  name: Check - Yamllint
-  
-  "on":
-    pull_request:
-      branches:
-        - main
-  
-  jobs:
-    yamllint:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: yashrajdighe/gh-actions/yamllint@Add-yamllint-action
+name: Check - Yamllint
+
+"on":
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: yashrajdighe/gh-actions/yamllint@Add-yamllint-action
