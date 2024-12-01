@@ -41,6 +41,9 @@ runs:
         python -m pip install --upgrade pip
         pip install --user yamllint
     - name: Analysing the code with pylint
+      env:
+        ALL_CHANGED_FILES: |
+          ${{ steps.changed-files.outputs.all_changed_files }}
       shell: bash
       run: |
         yamllint ${ALL_CHANGED_FILES}
