@@ -30,21 +30,22 @@ runs:
         PATCH=$(echo $LATEST_TAG | cut -d. -f3)
 
         BUMP_TYPE="patch" # default bump
+        PR_TITLE="${{ github.event.pull_request.title }}"
 
-        if [[ "${{ github.event.pull_request.title }}" =~ #major$ ]]; then
+        if echo "$PR_TITLE" | grep -Eq "#major$"; then
           MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0; BUMP_TYPE="major"
-        elif [[ "${{ github.event.pull_request.title }}" =~ #minor$ ]]; then
+        elif echo "$PR_TITLE" | grep -Eq "#minor$"; then
           MINOR=$((MINOR + 1)); PATCH=0; BUMP_TYPE="minor"
-        elif [[ "${{ github.event.pull_request.title }}" =~ #patch$ ]]; then
+        elif echo "$PR_TITLE" | grep -Eq "#patch$"; then
           PATCH=$((PATCH + 1)); BUMP_TYPE="patch"
         else
           PATCH=$((PATCH + 1)); BUMP_TYPE="patch"
         fi
 
         if [ "$LATEST_TAG" == "0.0.0" ]; then
-          if [[ "${{ github.event.pull_request.title }}" =~ #major$ ]]; then
+          if echo "$PR_TITLE" | grep -Eq "#major$"; then
             MAJOR=1; MINOR=0; PATCH=0; BUMP_TYPE="major"
-          elif [[ "${{ github.event.pull_request.title }}" =~ #minor$ ]]; then
+          elif echo "$PR_TITLE" | grep -Eq "#minor$"; then
             MAJOR=0; MINOR=1; PATCH=0; BUMP_TYPE="minor"
           else
             MAJOR=0; MINOR=0; PATCH=1; BUMP_TYPE="patch"
