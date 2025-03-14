@@ -63,15 +63,18 @@ runs:
         # Ensure major version is always up to date with minor and patch
         MAJOR_VERSION_TAG="v${MAJOR}"
         echo major_version_tag=${MAJOR_VERSION_TAG} >> $GITHUB_ENV
-        git tag -f $MAJOR_VERSION_TAG
-        git push origin $MAJOR_VERSION_TAG --force
 
-    - name: "Create new tag"
-      id: create_tag
+    - name: "Dry run or create tag"
+      id: create_or_dry_run
       shell: bash
       run: |
-        git tag ${{ env.new_version }}
-        git push origin ${{ env.new_version }}
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          echo "This is a dry run. The new version would be ${{ env.new_version }} and the major version tag would be ${{ env.major_version_tag }}."
+        else
+          git tag -f ${{ env.major_version_tag }}
+          git push origin ${{ env.major_version_tag }} --force
+          git tag ${{ env.new_version }}
+          git push origin ${{ env.new_version }}
 
     - name: "Summarize"
       id: summarize
