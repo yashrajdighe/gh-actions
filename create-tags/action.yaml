@@ -1,0 +1,79 @@
+name: "Create Tag on Merge"
+description: "Creates a tag on merge to master following semver and PR title containing #major, #minor, #patch"
+inputs:
+  GITHUB_TOKEN:
+    description: "GitHub token"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: "Checkout code"
+      uses: actions/checkout@v4
+
+    - name: "Get current version"
+      id: get_version
+      shell: bash
+      run: |
+        git fetch --tags
+        TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+        echo "current_version=${TAG}" >> $GITHUB_ENV
+
+    - name: "Determine bump type"
+      id: bump_type
+      shell: bash
+      run: |
+        PR_TITLE=$(jq -r .pull_request.title $GITHUB_EVENT_PATH)
+        if [[ "$PR_TITLE" == *"#major"* ]]; then
+          echo "bump=major" >> $GITHUB_ENV
+        elif [[ "$PR_TITLE" == *"#minor"* ]]; then
+          echo "bump=minor" >> $GITHUB_ENV
+        elif [[ "$PR_TITLE" == *"#patch"* ]]; then
+          echo "bump=patch" >> $GITHUB_ENV
+        else
+          echo "bump=patch" >> $GITHUB_ENV
+
+    - name: "Bump version"
+      id: bump_version
+      shell: bash
+      run: |
+        CURRENT_VERSION=${{ env.current_version }}
+        BUMP=${{ env.bump }}
+        IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR=${VERSION_PARTS[0]}
+        MINOR=${VERSION_PARTS[1]}
+        PATCH=${VERSION_PARTS[2]}
+
+        if [ "$BUMP" == "major" ]; then
+          MAJOR=$((MAJOR + 1))
+          MINOR=0
+          PATCH=0
+        elif [ "$BUMP" == "minor" ]; then
+          MINOR=$((MINOR + 1))
+          PATCH=0
+        elif [ "$BUMP" == "patch" ]; then
+          PATCH=$((PATCH + 1))
+        fi
+
+        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+        echo "new_version=${NEW_VERSION}" >> $GITHUB_ENV
+
+        # Ensure major version is always up to date with minor and patch
+        MAJOR_VERSION_TAG="v${MAJOR}"
+        echo major_version_tag=${MAJOR_VERSION_TAG} >> $GITHUB_ENV
+        git tag -f $MAJOR_VERSION_TAG
+        git push origin $MAJOR_VERSION_TAG --force
+
+    - name: "Create new tag"
+      id: create_tag
+      shell: bash
+      run: |
+        git tag ${{ env.new_version }}
+        git push origin ${{ env.new_version }}
+
+    - name: "Summarize"
+      id: summarize
+      shell: bash
+      if: always()
+      run: |
+        echo "### Tag created: ${{ env.new_version }}" >> $GITHUB_STEP_SUMMARY
+        echo "## Major version tag updated: ${{ env.major_version_tag }}" >> $GITHUB_STEP_SUMMARY
