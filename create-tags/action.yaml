@@ -6,6 +6,10 @@ inputs:
     description: "GitHub token to create tags"
     required: true
 
+outputs:
+  new_tag:
+    description: "The newly created tag or predicted next tag (dry run)"
+
 runs:
   using: "composite"
   steps:
@@ -15,7 +19,7 @@ runs:
     - name: Get latest tag
       id: get-latest-tag
       run: |
-        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
         echo "Latest tag: $latest_tag"
         echo "latest_tag=$latest_tag" >> $GITHUB_ENV
       shell: bash
@@ -31,12 +35,20 @@ runs:
 
         BUMP_TYPE="patch" # default bump
 
-        case "${{ github.event.pull_request.title }}" in
-          *#major*) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0; BUMP_TYPE="major" ;;
-          *#minor*) MINOR=$((MINOR + 1)); PATCH=0; BUMP_TYPE="minor" ;;
-          *#patch*) PATCH=$((PATCH + 1)); BUMP_TYPE="patch" ;;
-          *) PATCH=$((PATCH + 1)); BUMP_TYPE="patch" ;; # Default to patch bump
-        esac
+        if [ "$LATEST_TAG" == "0.0.1" ]; then
+          case "${{ github.event.pull_request.title }}" in
+            *#major*) MAJOR=1; MINOR=0; PATCH=0; BUMP_TYPE="major" ;;
+            *#minor*) MAJOR=0; MINOR=1; PATCH=0; BUMP_TYPE="minor" ;;
+            *) MAJOR=0; MINOR=0; PATCH=1; BUMP_TYPE="patch" ;; # Default to patch bump
+          esac
+        else
+          case "${{ github.event.pull_request.title }}" in
+            *#major*) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0; BUMP_TYPE="major" ;;
+            *#minor*) MINOR=$((MINOR + 1)); PATCH=0; BUMP_TYPE="minor" ;;
+            *#patch*) PATCH=$((PATCH + 1)); BUMP_TYPE="patch" ;;
+            *) PATCH=$((PATCH + 1)); BUMP_TYPE="patch" ;; # Default to patch bump
+          esac
+        fi
 
         NEW_TAG="v$MAJOR.$MINOR.$PATCH"
         echo "Predicted next tag: $NEW_TAG"
