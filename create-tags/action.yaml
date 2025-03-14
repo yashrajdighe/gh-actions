@@ -1,86 +1,70 @@
----
-name: "Create Tag on Merge"
-description: |
-  Creates a tag on merge to master following semver and PR title
-  containing #major, #minor, #patch
+name: "Semantic Version Tag Bump"
+description: "Bumps the GitHub tag based on PR title and outputs the new tag"
+
 inputs:
-  GITHUB_TOKEN:
-    description: "GitHub token"
+  github_token:
+    description: "GitHub token to create tags"
     required: true
+
+outputs:
+  new_tag:
+    description: "The newly created tag or predicted next tag (dry run)"
+
 runs:
   using: "composite"
   steps:
-    - name: "Checkout code"
+    - name: Check out repository
       uses: actions/checkout@v4
 
-    - name: "Get current version"
-      id: get_version
-      shell: bash
+    - name: Get latest tag
+      id: get-latest-tag
       run: |
-        git fetch --tags
-        TAG=$(git describe --tags `git rev-list --tags --max-count=1` || echo "0.0.0")
-        echo "current_version=${TAG}" >> $GITHUB_ENV
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+        echo "Latest tag: $latest_tag"
+        echo "latest_tag=$latest_tag" >> $GITHUB_ENV
+      shell: bash
 
-    - name: "Determine bump type"
-      id: bump_type
-      shell: bash
+    - name: Determine next version
+      id: bump-version
       run: |
-        PR_TITLE=$(jq -r .pull_request.title $GITHUB_EVENT_PATH)
-        if [[ "$PR_TITLE" == *"#major"* ]]; then
-          echo "bump=major" >> $GITHUB_ENV
-        elif [[ "$PR_TITLE" == *"#minor"* ]]; then
-          echo "bump=minor" >> $GITHUB_ENV
-        elif [[ "$PR_TITLE" == *"#patch"* ]]; then
-          echo "bump=patch" >> $GITHUB_ENV
+        LATEST_TAG=${{ env.latest_tag }}
+        MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
+        MINOR=$(echo $LATEST_TAG | cut -d. -f2)
+        PATCH=$(echo $LATEST_TAG | cut -d. -f3)
+
+        case "${{ github.event.pull_request.title }}" in
+          *#major*) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+          *#minor*) MINOR=$((MINOR + 1)); PATCH=0 ;;
+          *#patch*) PATCH=$((PATCH + 1)) ;;
+          *) PATCH=$((PATCH + 1)) ;; # Default to patch bump
+        esac
+
+        NEW_TAG="$MAJOR.$MINOR.$PATCH"
+        echo "Predicted next tag: $NEW_TAG"
+        echo "new_tag=$NEW_TAG" >> $GITHUB_ENV
+        echo "major_tag=$MAJOR" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Create and push tag (if not dry run)
+      if: github.event_name != 'pull_request'
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git tag ${{ env.new_tag }}
+        git push origin ${{ env.new_tag }}
+
+        # Update the major tag to point to the latest release
+        git tag -f ${{ env.major_tag }}
+        git push origin ${{ env.major_tag }} --force
+      shell: bash
+
+    - name: Add result to job summary
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          echo "Dry run: Predicted next tag will be **${{ env.new_tag }}**" >> $GITHUB_STEP_SUMMARY
+          echo "Major tag will be updated to **${{ env.major_tag }}**" >> $GITHUB_STEP_SUMMARY
         else
-          echo "bump=patch" >> $GITHUB_ENV
-
-    - name: "Bump version"
-      id: bump_version
-      shell: bash
-      run: |
-        CURRENT_VERSION=${{ env.current_version }}
-        BUMP=${{ env.bump }}
-        IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
-        MAJOR=${VERSION_PARTS[0]}
-        MINOR=${VERSION_PARTS[1]}
-        PATCH=${VERSION_PARTS[2]}
-
-        if [ "$BUMP" == "major" ]; then
-          MAJOR=$((MAJOR + 1))
-          MINOR=0
-          PATCH=0
-        elif [ "$BUMP" == "minor" ]; then
-          MINOR=$((MINOR + 1))
-          PATCH=0
-        elif [ "$BUMP" == "patch" ]; then
-          PATCH=$((PATCH + 1))
+          echo "New tag **${{ env.new_tag }}** has been created and pushed." >> $GITHUB_STEP_SUMMARY
+          echo "Major tag **${{ env.major_tag }}** has been updated." >> $GITHUB_STEP_SUMMARY
         fi
-
-        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-        echo "new_version=${NEW_VERSION}" >> $GITHUB_ENV
-
-        # Ensure major version is always up to date with minor and patch
-        MAJOR_VERSION_TAG="v${MAJOR}"
-        echo major_version_tag=${MAJOR_VERSION_TAG} >> $GITHUB_ENV
-
-    - name: "Dry run or create tag"
-      id: create_or_dry_run
       shell: bash
-      run: |
-        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-          echo "This is a dry run. The new version would be ${{ env.new_version }} and the major version tag would be ${{ env.major_version_tag }}."
-        else
-          git tag -f ${{ env.major_version_tag }}
-          git push origin ${{ env.major_version_tag }} --force
-          git tag ${{ env.new_version }}
-          git push origin ${{ env.new_version }}
-        fi
-
-    - name: "Summarize"
-      id: summarize
-      shell: bash
-      if: always()
-      run: |
-        echo "### Tag created: ${{ env.new_version }}" >> $GITHUB_STEP_SUMMARY
-        echo "## Major version tag updated: ${{ env.major_version_tag }}" >> $GITHUB_STEP_SUMMARY
