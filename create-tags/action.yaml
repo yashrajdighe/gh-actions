@@ -1,5 +1,7 @@
 name: "Create Tag on Merge"
-description: "Creates a tag on merge to master following semver and PR title containing #major, #minor, #patch"
+description: |
+  Creates a tag on merge to master following semver and PR title
+  containing #major, #minor, #patch
 inputs:
   GITHUB_TOKEN:
     description: "GitHub token"
