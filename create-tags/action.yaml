@@ -19,7 +19,7 @@ runs:
     - name: Get latest tag
       id: get-latest-tag
       run: |
-        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
         echo "Latest tag: $latest_tag"
         echo "latest_tag=$latest_tag" >> $GITHUB_ENV
       shell: bash
@@ -28,6 +28,7 @@ runs:
       id: bump-version
       run: |
         LATEST_TAG=${{ env.latest_tag }}
+        LATEST_TAG=${LATEST_TAG#v} # Remove 'v' prefix for processing
         MAJOR=$(echo $LATEST_TAG | cut -d. -f1)
         MINOR=$(echo $LATEST_TAG | cut -d. -f2)
         PATCH=$(echo $LATEST_TAG | cut -d. -f3)
@@ -39,10 +40,10 @@ runs:
           *) PATCH=$((PATCH + 1)) ;; # Default to patch bump
         esac
 
-        NEW_TAG="$MAJOR.$MINOR.$PATCH"
+        NEW_TAG="v$MAJOR.$MINOR.$PATCH"
         echo "Predicted next tag: $NEW_TAG"
         echo "new_tag=$NEW_TAG" >> $GITHUB_ENV
-        echo "major_tag=$MAJOR" >> $GITHUB_ENV
+        echo "major_tag=v$MAJOR" >> $GITHUB_ENV
       shell: bash
 
     - name: Create and push tag (if not dry run)
