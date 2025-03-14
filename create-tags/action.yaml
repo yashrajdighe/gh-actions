@@ -12,6 +12,16 @@ runs:
     - name: Check out repository
       uses: actions/checkout@v4
 
+    - name: Fetch latest PR details
+      if: github.event_name == 'pull_request'
+      run: |
+        PR_TITLE=$(gh pr view ${{ github.event.pull_request.number }} --json title -q ".title")
+        echo "Latest PR title: $PR_TITLE"
+        echo "pr_title=$PR_TITLE" >> $GITHUB_ENV
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      shell: bash
+
     - name: Get latest tag
       id: get-latest-tag
       run: |
@@ -30,9 +40,7 @@ runs:
         PATCH=$(echo $LATEST_TAG | cut -d. -f3)
 
         BUMP_TYPE="patch" # default bump
-        PR_TITLE="${{ github.event.pull_request.title }}"
-
-        echo $PR_TITLE
+        PR_TITLE="${{ env.pr_title }}"
 
         if echo "$PR_TITLE" | grep -Eq "#major$"; then
           MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0; BUMP_TYPE="major"
