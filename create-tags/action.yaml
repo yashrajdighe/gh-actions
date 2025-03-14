@@ -1,3 +1,4 @@
+---
 name: "Create Tag on Merge"
 description: |
   Creates a tag on merge to master following semver and PR title
