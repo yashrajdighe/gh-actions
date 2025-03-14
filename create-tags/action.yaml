@@ -6,10 +6,6 @@ inputs:
     description: "GitHub token to create tags"
     required: true
 
-outputs:
-  new_tag:
-    description: "The newly created tag or predicted next tag (dry run)"
-
 runs:
   using: "composite"
   steps:
@@ -19,7 +15,7 @@ runs:
     - name: Get latest tag
       id: get-latest-tag
       run: |
-        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
         echo "Latest tag: $latest_tag"
         echo "latest_tag=$latest_tag" >> $GITHUB_ENV
       shell: bash
