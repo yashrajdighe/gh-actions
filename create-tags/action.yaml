@@ -18,7 +18,7 @@ runs:
       shell: bash
       run: |
         git fetch --tags
-        TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+        TAG=$(git describe --tags `git rev-list --tags --max-count=1` || echo "0.0.0")
         echo "current_version=${TAG}" >> $GITHUB_ENV
 
     - name: "Determine bump type"
