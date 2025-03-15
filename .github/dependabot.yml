@@ -1,0 +1,30 @@
+version: 2
+updates:
+  # Enable version updates for GitHub Actions in workflow files
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every day
+      interval: "daily"
+    commit-message:
+      prefix: "ci:"
+      include: "scope"
+    
+  # Enable version updates for GitHub Actions in all composite actions
+  - package-ecosystem: "github-actions"
+    directory: "/**/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "ci:"
+      include: "scope"
+    
+  # Enable version updates for Python packages
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      # Check for updates to Python packages every day
+      interval: "daily"
+    commit-message:
+      prefix: "deps:"
+      include: "scope" 
