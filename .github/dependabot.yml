@@ -27,4 +27,4 @@ updates:
       interval: "daily"
     commit-message:
       prefix: "deps:"
-      include: "scope" 
+      include: "scope"
