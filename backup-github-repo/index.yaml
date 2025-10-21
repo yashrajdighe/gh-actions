@@ -1,0 +1,12 @@
+name: "Backup GitHub Repo"
+description: "Backup all GitHub repositories to S3 bucket."
+inputs:
+  token:
+    description: "The token to use to access the GitHub API"
+    required: true
+  repository:
+    description: "The GitHub repository to back up (format: owner/repo)"
+    required: true
+runs:
+  using: "node16"
+  main: "./dist/index.js"
