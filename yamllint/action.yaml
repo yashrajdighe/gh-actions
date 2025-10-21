@@ -10,7 +10,7 @@ runs:
   using: "composite"
   steps:
     # v4.2.2
-    - uses: actions/checkout@cbb722410c2e876e24abbe8de2cc27693e501dcb
+    - uses: actions/checkout@ff7abcd0c3c05ccf6adc123a8cd1fd4fb30fb493
     - name: Get changed files
       id: changed-files
       # v45.0.4
