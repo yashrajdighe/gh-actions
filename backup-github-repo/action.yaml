@@ -1,3 +1,4 @@
+---
 name: "Backup GitHub Repo"
 description: "Backup all GitHub repositories to S3 bucket."
 inputs:
