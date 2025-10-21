@@ -33706,7 +33706,7 @@ const clone = async () => {
     const repository = core.getInput("repository");
     const [owner, repo] = repository.split("/");
 
-    const remote = `https://${git_user}:${token}@${owner}/${repo}.git`;
+    const remote = `https://${git_user}:${token}@github.com/${owner}/${repo}.git`;
 
     simpleGit()
       .clone(remote)
