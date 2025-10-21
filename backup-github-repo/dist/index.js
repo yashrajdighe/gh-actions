@@ -63058,6 +63058,18 @@ module.exports = /*#__PURE__*/JSON.parse('{"name":"@aws-sdk/client-s3","descript
 /******/ 	__nccwpck_require__.m = __webpack_modules__;
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__nccwpck_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__nccwpck_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/create fake namespace object */
 /******/ 	(() => {
 /******/ 		var getProto = Object.getPrototypeOf ? (obj) => (Object.getPrototypeOf(obj)) : (obj) => (obj.__proto__);
@@ -63190,18 +63202,23 @@ var __webpack_exports__ = {};
 (() => {
 "use strict";
 __nccwpck_require__.r(__webpack_exports__);
-/* harmony import */ var _aws_sdk_client_s3__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(3711);
+/* harmony import */ var _aws_sdk_client_s3__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(3711);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(9896);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(fs__WEBPACK_IMPORTED_MODULE_0__);
+
+
 
 
 const { exec } = __nccwpck_require__(7698);
 
-const s3Client = new _aws_sdk_client_s3__WEBPACK_IMPORTED_MODULE_0__/* .S3Client */ .YxF({});
+const s3Client = new _aws_sdk_client_s3__WEBPACK_IMPORTED_MODULE_1__/* .S3Client */ .YxF({});
 
 const core = __nccwpck_require__(7484);
 // const github = require("@actions/github");
 const simpleGit = __nccwpck_require__(9065);
 const gitUser = "backup-bot";
 const bucketName = "common-yashrajdighe-git-repo-backup";
+const dirPath = "/tmp/repo_backups";
 
 const clone = async () => {
   try {
@@ -63212,7 +63229,7 @@ const clone = async () => {
     const remote = `https://${gitUser}:${token}@github.com/${owner}/${repo}.git`;
 
     simpleGit()
-      .clone(remote, "/tmp/repo_mirror", ["--mirror"]) // `./${repo}.git`
+      .clone(remote, dirPath, ["--mirror"]) // `./${repo}.git`
       .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
   } catch (error) {
@@ -63257,9 +63274,14 @@ const uploadToS3 = async (bucketName, key, body) => {
 
 const main = async () => {
   try {
+    (0,fs__WEBPACK_IMPORTED_MODULE_0__.mkdirSync)(dirPath, { recursive: true });
+    console.log(`Directory created at: ${dirPath}`);
+
     await clone();
+
     const repoName = `${core.getInput("repository").split("/")[1]}.git`;
-    exec("ls -al", (error, stdout, stderr) => {
+
+    exec(`"ls -al ${dirPath}"`, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;

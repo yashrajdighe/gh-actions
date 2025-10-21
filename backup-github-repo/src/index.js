@@ -8,6 +8,8 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 
+import { mkdirSync } from "fs";
+
 const { exec } = require("child_process");
 
 const s3Client = new S3Client({});
@@ -17,6 +19,7 @@ const core = require("@actions/core");
 const simpleGit = require("simple-git");
 const gitUser = "backup-bot";
 const bucketName = "common-yashrajdighe-git-repo-backup";
+const dirPath = "/tmp/repo_backups";
 
 const clone = async () => {
   try {
@@ -27,7 +30,7 @@ const clone = async () => {
     const remote = `https://${gitUser}:${token}@github.com/${owner}/${repo}.git`;
 
     simpleGit()
-      .clone(remote, "/tmp/repo_mirror", ["--mirror"]) // `./${repo}.git`
+      .clone(remote, dirPath, ["--mirror"]) // `./${repo}.git`
       .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
   } catch (error) {
@@ -72,9 +75,14 @@ const uploadToS3 = async (bucketName, key, body) => {
 
 const main = async () => {
   try {
+    mkdirSync(dirPath, { recursive: true });
+    console.log(`Directory created at: ${dirPath}`);
+
     await clone();
+
     const repoName = `${core.getInput("repository").split("/")[1]}.git`;
-    exec("ls -al", (error, stdout, stderr) => {
+
+    exec(`"ls -al ${dirPath}"`, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;
