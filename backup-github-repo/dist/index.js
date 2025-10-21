@@ -63215,8 +63215,22 @@ const clone = async () => {
       .clone(remote) // `./${repo}.git`
       .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
-    exec("ls -al");
-    exec("pwd");
+    exec("ls -l", (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      console.error(`stderr: ${stderr}`);
+    });
+    exec("pwd", (error, stdout, stderr) => {
+      if (error) {
+        console.error(`exec error: ${error}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      console.error(`stderr: ${stderr}`);
+    });
   } catch (error) {
     core.setFailed(`Action failed with error: ${error.message}`);
     error;
@@ -63261,8 +63275,8 @@ const main = async () => {
   try {
     await clone();
     const repoName = `${core.getInput("repository").split("/")[1]}.git`;
-    const archiveName = `${repoName}.tar.zst`;
-    await createTarZst(`./${repoName}`, archiveName);
+    // const archiveName = `${repoName}.tar.zst`;
+    // await createTarZst(`./${repoName}`, archiveName);
 
     // const fs = require("fs");
     // const fileStream = fs.createReadStream(archiveName);
