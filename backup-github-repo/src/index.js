@@ -1,7 +1,20 @@
+import {
+  S3Client,
+  PutObjectCommand,
+  CreateBucketCommand,
+  DeleteObjectCommand,
+  DeleteBucketCommand,
+  paginateListObjectsV2,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+
+const s3Client = new S3Client({});
+
 const core = require("@actions/core");
 // const github = require("@actions/github");
 const simpleGit = require("simple-git");
-const git_user = "backup-bot";
+const gitUser = "backup-bot";
+const bucketName = "common-yashrajdighe-git-repo-backup";
 
 const clone = async () => {
   try {
@@ -9,37 +22,69 @@ const clone = async () => {
     const repository = core.getInput("repository");
     const [owner, repo] = repository.split("/");
 
-    const remote = `https://${git_user}:${token}@github.com/${owner}/${repo}.git`;
+    const remote = `https://${gitUser}:${token}@github.com/${owner}/${repo}.git`;
 
     simpleGit()
       .clone(remote)
-      .then(() => console.log("finished"))
+      .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
-
-    // const octokit = github.getOctokit(token);
-
-    // Get repository information
-    // const { data: repoData } = await octokit.rest.repos.get({
-    //   owner,
-    //   repo,
-    // });
-
-    // core.info(`Backing up repository: ${repoData.full_name}`);
-
-    // Here you would add the logic to back up the repository,
-    // such as cloning it to a local directory or pushing it to another remote.
-
-    // core.info(`Repository ${repoData.full_name} backed up successfully.`);
   } catch (error) {
     core.setFailed(`Action failed with error: ${error.message}`);
+    error;
+  }
+};
+
+const createTarZst = async (sourceDir, outputFile) => {
+  const { exec } = require("child_process");
+  const command = `tar -I zstd -cvf ${outputFile} -C ${sourceDir} .`;
+
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error creating tar.zst: ${error.message}`);
+        return reject(error);
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
+      console.log(`stdout: ${stdout}`);
+      resolve();
+    });
+  });
+};
+
+const uploadToS3 = async (bucketName, key, body) => {
+  const putObjectParams = {
+    Bucket: bucketName,
+    Key: key,
+    Body: body,
+  };
+
+  try {
+    await s3Client.send(new PutObjectCommand(putObjectParams));
+    console.log(`Successfully uploaded ${key} to ${bucketName}`);
+  } catch (err) {
+    console.error("Error", err);
+    throw err;
   }
 };
 
 const main = async () => {
   try {
     await clone();
+    const repoName = `${core.getInput("repository").split("/")[1]}.git`;
+    const archiveName = `${repoName}.tar.zst`;
+    await createTarZst(`./${repoName}`, archiveName);
+
+    // const fs = require("fs");
+    // const fileStream = fs.createReadStream(archiveName);
+
+    // await uploadToS3(bucketName, archiveName, fileStream);
+
+    // fs.unlinkSync(archiveName);
   } catch (error) {
     core.setFailed(error.message);
+    error;
   }
 };
 

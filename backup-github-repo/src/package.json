@@ -12,6 +12,7 @@
   "dependencies": {
     "@actions/core": "^1.11.1",
     "@actions/github": "^6.0.1",
+    "@aws-sdk/client-s3": "^3.913.0",
     "@vercel/ncc": "^0.38.4",
     "simple-git": "^3.28.0"
   }
