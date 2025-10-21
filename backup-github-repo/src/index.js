@@ -8,7 +8,7 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 
-import { mkdirSync } from "fs";
+import { mkdirSync, readdirSync } from "fs";
 
 const { exec } = require("child_process");
 
@@ -80,16 +80,11 @@ const main = async () => {
 
     await clone();
 
+    const files = readdirSync(dirPath);
+    console.log("Files in directory:", files);
+
     const repoName = `${core.getInput("repository").split("/")[1]}.git`;
 
-    exec(`"ls -al ${dirPath}"`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-      console.error(`stderr: ${stderr}`);
-    });
     // const archiveName = `${repoName}.tar.zst`;
     // await createTarZst(`./${repoName}`, archiveName);
 

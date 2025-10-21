@@ -63279,16 +63279,11 @@ const main = async () => {
 
     await clone();
 
+    const files = (0,fs__WEBPACK_IMPORTED_MODULE_0__.readdirSync)(dirPath);
+    console.log("Files in directory:", files);
+
     const repoName = `${core.getInput("repository").split("/")[1]}.git`;
 
-    exec(`"ls -al ${dirPath}"`, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-      console.error(`stderr: ${stderr}`);
-    });
     // const archiveName = `${repoName}.tar.zst`;
     // await createTarZst(`./${repoName}`, archiveName);
 
