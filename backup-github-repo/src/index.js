@@ -27,7 +27,7 @@ const clone = async () => {
     const remote = `https://${gitUser}:${token}@github.com/${owner}/${repo}.git`;
 
     simpleGit()
-      .clone(remote) // `./${repo}.git`
+      .mirror(remote) // `./${repo}.git`
       .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
     exec("ls -l", (error, stdout, stderr) => {
