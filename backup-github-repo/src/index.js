@@ -76,7 +76,7 @@ const uploadToS3 = async (bucketName, key, body) => {
 
 const generateS3Key = (repository) => {
   const timestamp = new Date().toISOString().replace(/[:.-]/g, "");
-  return `github/${repoName}/${repository}/backup_${timestamp}.tar.zst`;
+  return `github/${repository}/backup_${timestamp}.tar.zst`;
 };
 
 const main = async () => {
