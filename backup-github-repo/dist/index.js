@@ -63215,7 +63215,7 @@ const clone = async () => {
       .mirror(remote) // `./${repo}.git`
       .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
-    exec("ls -l", (error, stdout, stderr) => {
+    exec("ls -al", (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;
