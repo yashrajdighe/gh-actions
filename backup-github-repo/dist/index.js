@@ -63193,6 +63193,8 @@ __nccwpck_require__.r(__webpack_exports__);
 /* harmony import */ var _aws_sdk_client_s3__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(3711);
 
 
+const { exec } = __nccwpck_require__(7698);
+
 const s3Client = new _aws_sdk_client_s3__WEBPACK_IMPORTED_MODULE_0__/* .S3Client */ .YxF({});
 
 const core = __nccwpck_require__(7484);

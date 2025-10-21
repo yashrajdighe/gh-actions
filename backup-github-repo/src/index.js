@@ -8,6 +8,8 @@ import {
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
 
+const { exec } = require("child_process");
+
 const s3Client = new S3Client({});
 
 const core = require("@actions/core");
