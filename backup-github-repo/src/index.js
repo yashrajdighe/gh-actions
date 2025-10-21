@@ -39,6 +39,10 @@ const clone = async () => {
   }
 };
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const createTarZst = async (sourceDir, outputFile) => {
   const command = `tar -I zstd -cvf ${outputFile} -C ${sourceDir} .`;
 
@@ -79,6 +83,10 @@ const main = async () => {
     console.log(`Directory created at: ${dirPath}`);
 
     await clone();
+
+    console.log("Start...");
+    await sleep(20000); // wait 20 seconds
+    console.log("2 seconds later...");
 
     const files = readdirSync(dirPath);
     console.log("Files in directory:", files);
