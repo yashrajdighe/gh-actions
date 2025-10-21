@@ -92,12 +92,12 @@ const main = async () => {
     const archives = readdirSync(archivePath);
     console.log("Files in directory:", archives);
 
-    // const fs = require("fs");
-    // const fileStream = fs.createReadStream(archiveName);
+    const fs = require("fs");
+    const fileStream = fs.createReadStream(archiveName);
 
-    // await uploadToS3(bucketName, archiveName, fileStream);
+    await uploadToS3(bucketName, archiveName, fileStream);
 
-    // fs.unlinkSync(archiveName);
+    fs.unlinkSync(archiveName);
   } catch (error) {
     core.setFailed(error.message);
     error;

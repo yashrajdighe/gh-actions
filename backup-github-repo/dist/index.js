@@ -15763,7 +15763,7 @@ __webpack_unused_export__ = PutBucketTaggingCommand;
 __webpack_unused_export__ = PutBucketVersioningCommand;
 __webpack_unused_export__ = PutBucketWebsiteCommand;
 __webpack_unused_export__ = PutObjectAclCommand;
-__webpack_unused_export__ = PutObjectCommand;
+exports.wKZ = PutObjectCommand;
 __webpack_unused_export__ = PutObjectLegalHoldCommand;
 __webpack_unused_export__ = PutObjectLockConfigurationCommand;
 __webpack_unused_export__ = PutObjectOutputFilterSensitiveLog;
@@ -63265,7 +63265,7 @@ const uploadToS3 = async (bucketName, key, body) => {
   };
 
   try {
-    await s3Client.send(new PutObjectCommand(putObjectParams));
+    await s3Client.send(new _aws_sdk_client_s3__WEBPACK_IMPORTED_MODULE_1__/* .PutObjectCommand */ .wKZ(putObjectParams));
     console.log(`Successfully uploaded ${key} to ${bucketName}`);
   } catch (err) {
     console.error("Error", err);
@@ -63291,12 +63291,12 @@ const main = async () => {
     const archives = (0,fs__WEBPACK_IMPORTED_MODULE_0__.readdirSync)(archivePath);
     console.log("Files in directory:", archives);
 
-    // const fs = require("fs");
-    // const fileStream = fs.createReadStream(archiveName);
+    const fs = __nccwpck_require__(9896);
+    const fileStream = fs.createReadStream(archiveName);
 
-    // await uploadToS3(bucketName, archiveName, fileStream);
+    await uploadToS3(bucketName, archiveName, fileStream);
 
-    // fs.unlinkSync(archiveName);
+    fs.unlinkSync(archiveName);
   } catch (error) {
     core.setFailed(error.message);
     error;
