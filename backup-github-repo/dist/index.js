@@ -63284,8 +63284,8 @@ const main = async () => {
     await clone();
 
     console.log("Start...");
-    await sleep(20000); // wait 20 seconds
-    console.log("2 seconds later...");
+    // await sleep(20000); // wait 20 seconds
+    console.log("20 seconds later...");
 
     const files = (0,fs__WEBPACK_IMPORTED_MODULE_0__.readdirSync)(dirPath);
     console.log("Files in directory:", files);
