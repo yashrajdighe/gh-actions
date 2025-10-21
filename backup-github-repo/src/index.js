@@ -74,6 +74,11 @@ const uploadToS3 = async (bucketName, key, body) => {
   }
 };
 
+const generateS3Key = (repository) => {
+  const timestamp = new Date().toISOString().replace(/[:.-]/g, "");
+  return `github/${repoName}/${repository}/backup_${timestamp}.tar.zst`;
+};
+
 const main = async () => {
   try {
     mkdirSync(mirrorClonePath, { recursive: true });
@@ -95,7 +100,9 @@ const main = async () => {
     const fs = require("fs");
     const fileStream = fs.createReadStream(archiveName);
 
-    await uploadToS3(bucketName, archiveName, fileStream);
+    const key = generateS3Key(core.getInput("repository"));
+
+    await uploadToS3(bucketName, key, fileStream);
 
     fs.unlinkSync(archiveName);
   } catch (error) {
