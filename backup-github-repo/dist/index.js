@@ -63218,7 +63218,8 @@ const core = __nccwpck_require__(7484);
 const simpleGit = __nccwpck_require__(9065);
 const gitUser = "backup-bot";
 const bucketName = "common-yashrajdighe-git-repo-backup";
-const dirPath = "/tmp/repo_backups";
+const mirrorClonePath = "/tmp/repo_backups";
+const archivePath = "/tmp";
 
 const clone = async () => {
   try {
@@ -63229,7 +63230,7 @@ const clone = async () => {
     const remote = `https://${gitUser}:${token}@github.com/${owner}/${repo}.git`;
 
     await simpleGit()
-      .clone(remote, dirPath, ["--mirror"]) // `./${repo}.git`
+      .clone(remote, mirrorClonePath, ["--mirror"]) // `./${repo}.git`
       .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
   } catch (error) {
@@ -63237,10 +63238,6 @@ const clone = async () => {
     error;
   }
 };
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 const createTarZst = async (sourceDir, outputFile) => {
   const command = `tar -I zstd -cvf ${outputFile} -C ${sourceDir} .`;
@@ -63278,22 +63275,21 @@ const uploadToS3 = async (bucketName, key, body) => {
 
 const main = async () => {
   try {
-    (0,fs__WEBPACK_IMPORTED_MODULE_0__.mkdirSync)(dirPath, { recursive: true });
-    console.log(`Directory created at: ${dirPath}`);
+    (0,fs__WEBPACK_IMPORTED_MODULE_0__.mkdirSync)(mirrorClonePath, { recursive: true });
+    console.log(`Directory created at: ${mirrorClonePath}`);
 
     await clone();
 
-    console.log("Start...");
-    // await sleep(20000); // wait 20 seconds
-    console.log("20 seconds later...");
-
-    const files = (0,fs__WEBPACK_IMPORTED_MODULE_0__.readdirSync)(dirPath);
+    const files = (0,fs__WEBPACK_IMPORTED_MODULE_0__.readdirSync)(mirrorClonePath);
     console.log("Files in directory:", files);
 
     const repoName = `${core.getInput("repository").split("/")[1]}.git`;
 
-    // const archiveName = `${repoName}.tar.zst`;
-    // await createTarZst(`./${repoName}`, archiveName);
+    const archiveName = `${archivePath}/${repoName}.tar.zst`;
+    await createTarZst(`${mirrorClonePath}`, archiveName);
+
+    const archives = (0,fs__WEBPACK_IMPORTED_MODULE_0__.readdirSync)(archivePath);
+    console.log("Files in directory:", archives);
 
     // const fs = require("fs");
     // const fileStream = fs.createReadStream(archiveName);
