@@ -74,15 +74,7 @@ const main = async () => {
   try {
     await clone();
     const repoName = `${core.getInput("repository").split("/")[1]}.git`;
-    exec("ls -al /tmp/repo_mirror", (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-      console.error(`stderr: ${stderr}`);
-    });
-    exec("pwd", (error, stdout, stderr) => {
+    exec("ls -al", (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;
