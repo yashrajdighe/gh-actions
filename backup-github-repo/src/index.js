@@ -25,9 +25,11 @@ const clone = async () => {
     const remote = `https://${gitUser}:${token}@github.com/${owner}/${repo}.git`;
 
     simpleGit()
-      .clone(remote, `./${repo}.git`)
+      .clone(remote) // `./${repo}.git`
       .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
+    exec("ls -al");
+    exec("pwd");
   } catch (error) {
     core.setFailed(`Action failed with error: ${error.message}`);
     error;
@@ -35,7 +37,6 @@ const clone = async () => {
 };
 
 const createTarZst = async (sourceDir, outputFile) => {
-  const { exec } = require("child_process");
   const command = `tar -I zstd -cvf ${outputFile} -C ${sourceDir} .`;
 
   return new Promise((resolve, reject) => {
