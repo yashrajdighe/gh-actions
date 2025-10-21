@@ -63212,10 +63212,10 @@ const clone = async () => {
     const remote = `https://${gitUser}:${token}@github.com/${owner}/${repo}.git`;
 
     simpleGit()
-      .clone(remote, ".", ["--mirror"]) // `./${repo}.git`
+      .clone(remote, "/tmp/repo_mirror", ["--mirror"]) // `./${repo}.git`
       .then(() => console.log(`Clone successful for ${repository}`))
       .catch((err) => console.error("failed: ", err));
-    exec("ls -al", (error, stdout, stderr) => {
+    exec("ls -al /tmp/repo_mirror", (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;
