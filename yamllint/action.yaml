@@ -14,7 +14,7 @@ runs:
     - name: Get changed files
       id: changed-files
       # v45.0.4
-      uses: tj-actions/changed-files@26a38635fc1173cc5820336ce97be6188d0de9f5
+      uses: tj-actions/changed-files@dbf178ceecb9304128c8e0648591d71208c6e2c9
       with:
         # Avoid using single or double quotes for multiline patterns
         files: |
