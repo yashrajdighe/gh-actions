@@ -33,7 +33,7 @@ runs:
     - name: Set up Python ${{ inputs.python-version }}
       if: steps.changed-files.outputs.any_changed == 'true'
       # v5.3.0
-      uses: actions/setup-python@55aad42e4674b58b2b2fb7d8e7552402d922b4e7
+      uses: actions/setup-python@28f2168f4d98ee0445e3c6321f6e6616c83dd5ec
       with:
         python-version: ${{ inputs.python-version }}
     - name: Install dependencies
